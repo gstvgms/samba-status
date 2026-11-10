@@ -18,22 +18,35 @@ Fica fora do Railway de propósito: se o Samba cair, esta página continua no ar
   cada rodada, para o repositório não crescer. A página publicada lê uma cópia em `data/state.json`.
 - `public/` é a página (HTML, CSS e JS sem build), publicada pelo GitHub Pages via Actions.
 
-## Escrever sobre uma queda
+## Escrever sobre uma queda, uma instabilidade ou uma manutenção
 
-Edite `public/avisos.json` e faça push no `main` (a página atualiza na hora):
+Edite `public/avisos.json` e faça push no `main`. A página atualiza em 1 ou 2 minutos.
 
 ```json
 [
   {
+    "tipo": "queda",
+    "servicos": ["gateway"],
+    "titulo": "Calls não conectavam",
+    "texto": "Resumo opcional, para quem usa o Samba.",
     "inicio": "2026-11-10T03:10:00-03:00",
     "fim": "2026-11-10T03:45:00-03:00",
-    "titulo": "Calls não conectavam",
-    "texto": "Explicação curta, para quem usa o Samba."
+    "atualizacoes": [
+      { "quando": "2026-11-10T03:15:00-03:00", "estado": "investigando", "texto": "Estamos vendo." },
+      { "quando": "2026-11-10T03:45:00-03:00", "estado": "resolvido", "texto": "Voltou depois de um reinício." }
+    ]
   }
 ]
 ```
 
-Sem `fim`, a queda aparece como ainda aberta.
+- `tipo`:
+  - `queda` (barra vermelha);
+  - `parcial`: funcionando com instabilidade (barra ocre);
+  - `manutencao` (barra azul). Com `inicio` no futuro, aparece em "Manutenção marcada" no topo.
+- `servicos`: `site`, `gateway` (mensagens e calls), `voz`, `updates`. Sem ele, vale para todos.
+- `fim`: sem ele, o aviso fica aberto e aparece no resumo do topo e na etiqueta do serviço.
+- `estado` das atualizações: `investigando`, `identificado`, `monitorando`, `resolvido`, `agendada`, `andamento`, `concluida`. Aparecem da mais nova para a mais velha.
+- Uma queda que a verificação automática viu e que já tem aviso escrito no mesmo horário e serviço aparece uma vez só, como o aviso.
 
 ## Domínio
 
