@@ -1,0 +1,374 @@
+/* Status do Samba: the "Quintal brasileiro" palette of the app (Noite by default, Domingo de sol in light mode). */
+
+@font-face {
+  font-family: 'Figtree Variable';
+  src: url('fonts/figtree-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 300 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fraunces Variable';
+  src: url('fonts/fraunces-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --bg: #0a100d;
+  --panel: #121b17;
+  --line: #22322a;
+  --mata: #123528;
+  --text: #dfe7e0;
+  --strong: #fff3e0;
+  --muted: #9fb2a8;
+  --accent: #e0663a;
+  --gold: #e3a53c;
+  --ok: #5cc796;
+  --bad: #e2483f;
+  --none: #2a3a32;
+  --link: #ffb894;
+  --font-ui: 'Figtree Variable', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6ecd9;
+    --panel: #fbf3e3;
+    --line: #e2d3b6;
+    --text: #2a1d17;
+    --strong: #1c1511;
+    --muted: #6b5a4e;
+    --accent: #b04420;
+    --gold: #94570a;
+    --ok: #1c7a54;
+    --bad: #b83a30;
+    --none: #e2d3b6;
+    --link: #8a3417;
+    color-scheme: light;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.45 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--link);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--strong);
+  margin: 0;
+}
+
+h2 {
+  font: 800 22px/1.2 var(--font-display);
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+p {
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.wrap {
+  width: min(760px, 100% - 32px);
+  margin-inline: auto;
+}
+
+/* Top bar on the forest green, with the ochre Copacabana wave underneath. */
+.top {
+  background: var(--mata);
+  color: #fff3e0;
+  padding-bottom: 6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='6' viewBox='0 0 24 6'%3E%3Cpath d='M0 3c3 0 3-2 6-2s3 2 6 2 3-2 6-2 3 2 6 2' fill='none' stroke='%23e3a53c' stroke-width='1.6'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+  font: 800 22px/1 var(--font-display);
+}
+
+.tag {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e3a53c;
+  border: 1px solid rgba(227, 165, 60, 0.5);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+main {
+  display: grid;
+  gap: 40px;
+  padding-block: 32px 24px;
+}
+
+/* The answer to "is it working?", first and big. */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--muted);
+}
+
+.summary h1 {
+  font: 800 28px/1.15 var(--font-display);
+}
+
+.summary p {
+  margin-top: 4px;
+}
+
+.summary .dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.summary.ok {
+  border-left-color: var(--ok);
+}
+
+.summary.ok .dot {
+  background: var(--ok);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--ok) 22%, transparent);
+}
+
+.summary.bad {
+  border-left-color: var(--bad);
+}
+
+.summary.bad .dot {
+  background: var(--bad);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--bad) 22%, transparent);
+}
+
+.summary.stale {
+  border-left-color: var(--gold);
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sw {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.services,
+.history {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.service {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.service-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hint {
+  font-size: 13.5px;
+  margin-top: 2px;
+}
+
+.pill {
+  flex: none;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.pill.ok {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
+}
+
+.pill.bad {
+  color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+}
+
+.bars {
+  display: flex;
+  gap: 2px;
+  height: 32px;
+  margin-top: 16px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 0;
+  border-radius: 2px;
+}
+
+.ok:is(.bar, .sw) {
+  background: var(--ok);
+}
+
+.meh:is(.bar, .sw) {
+  background: var(--gold);
+}
+
+.bad:is(.bar, .sw) {
+  background: var(--bad);
+}
+
+.none:is(.bar, .sw) {
+  background: var(--none);
+}
+
+.service-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12.5px;
+}
+
+.service-foot .short {
+  display: none;
+}
+
+.uptime {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.history li {
+  padding: 12px 16px;
+  border-left: 4px solid var(--line);
+  background: var(--panel);
+  border-radius: 0 8px 8px 0;
+}
+
+.history li.open {
+  border-left-color: var(--bad);
+}
+
+.history .when {
+  font-size: 13.5px;
+  margin-top: 2px;
+}
+
+.history .note {
+  margin-top: 6px;
+}
+
+.history .empty {
+  border-left-color: var(--ok);
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-block: 8px 40px;
+  font-size: 13.5px;
+}
+
+/* Phones: the last 45 days, so each bar stays wide enough to see. */
+@media (max-width: 560px) {
+  .bar:nth-child(-n + 45) {
+    display: none;
+  }
+
+  .service-foot .long {
+    display: none;
+  }
+
+  .service-foot .short {
+    display: inline;
+  }
+
+  .summary {
+    padding: 16px;
+  }
+
+  .summary h1 {
+    font-size: 24px;
+  }
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Status do Samba</title>
+    <meta name="description" content="O Samba está funcionando? Site, mensagens, calls, voz e live, verificados a cada 5 minutos." />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="logo.svg" type="image/svg+xml" />
+    <link rel="preload" href="fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap top-row">
+        <a class="brand" href="https://sambachat.app/"><img src="logo.svg" alt="" width="32" height="32" />Samba</a>
+        <span class="tag">Status</span>
+      </div>
+    </header>
+
+    <main class="wrap" id="main">
+      <section class="summary" id="summary" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <div>
+          <h1 id="summary-title">Conferindo o Samba…</h1>
+          <p id="summary-detail" class="muted"></p>
+        </div>
+      </section>
+
+      <section aria-labelledby="services-title">
+        <div class="section-head">
+          <h2 id="services-title">Como está cada parte</h2>
+          <p class="muted legend" aria-hidden="true">
+            <span><i class="sw ok"></i>no ar</span><span><i class="sw meh"></i>oscilou</span><span><i class="sw bad"></i>caiu</span><span><i class="sw none"></i>sem dados</span>
+          </p>
+        </div>
+        <ul class="services" id="services"></ul>
+      </section>
+
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Quedas dos últimos 30 dias</h2>
+        <ul class="history" id="history"></ul>
+      </section>
+    </main>
+
+    <footer class="wrap foot muted">
+      <p>Verificado de fora do Samba a cada 5 minutos. <span id="since"></span></p>
+      <p><a href="https://sambachat.app/">sambachat.app</a></p>
+    </footer>
+  </body>
+</html>
