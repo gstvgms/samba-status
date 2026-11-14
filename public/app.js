@@ -1,4 +1,4 @@
-// Draws the status page from data/state.json (written by check.mjs every ~5 min) and avisos.json (what the team writes
+// Draws the status page from state.json on the `state` branch (written by check.mjs every 5 min) and avisos.json (what the team writes
 // by hand: outages, instability and planned maintenance, with updates; format in the README).
 'use strict';
 
@@ -245,7 +245,7 @@ function renderHistory(state, notes, now) {
 async function load() {
   const bust = `?t=${Date.now()}`;
   try {
-    const [stateResponse, notesResponse] = await Promise.all([fetch(`data/state.json${bust}`), fetch(`avisos.json${bust}`)]);
+    const [stateResponse, notesResponse] = await Promise.all([fetch(`https://raw.githubusercontent.com/gstvgms/samba-status/state/state.json${bust}`), fetch(`avisos.json${bust}`)]);
     if (!stateResponse.ok) throw new Error(String(stateResponse.status));
     const state = await stateResponse.json();
     const rawNotes = notesResponse.ok ? await notesResponse.json().catch(() => []) : [];

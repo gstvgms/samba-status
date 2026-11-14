@@ -1,10 +1,13 @@
-# Checks the Samba every 5 minutes (GitHub may run it a few minutes late) and publishes the page on GitHub Pages.
-# The history lives on the `state` branch: one commit, replaced each run, so the repository doesn't grow.
+# Checks the Samba every 5 minutes and keeps the history on the `state` branch (one commit, replaced each round, so the
+# repository doesn't grow). The page reads that branch directly, so a check doesn't need a Pages deploy.
+#
+# GitHub only runs `schedule` every few hours in practice (13/11/2026: 5 to 8 h between runs), so one run loops for
+# almost the 6 h a job may last and then starts the next one itself. The schedule stays as a backup if the chain breaks.
 name: Verificar o Samba
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -13,18 +16,40 @@ permissions:
   contents: write
   pages: write
   id-token: write
-
-concurrency:
-  group: status
-  cancel-in-progress: false
+  actions: write
 
 jobs:
-  check:
+  # The page itself (HTML, CSS, JS, avisos.json): only when someone pushes to main.
+  page:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    concurrency:
+      group: status-page
+      cancel-in-progress: true
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Testes
+        run: node --test
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  # The checks: one at a time (a scheduled run that arrives meanwhile waits, and only the newest waiting one is kept).
+  check:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    concurrency:
+      group: status-check
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
 
@@ -32,41 +57,49 @@ jobs:
         with:
           node-version: 24
 
-      - name: Testes
-        if: github.event_name == 'push'
-        run: node --test
-
-      - name: Pegar o histórico
-        run: |
-          mkdir -p public/data
-          set +e
-          git ls-remote --exit-code --heads origin state > /dev/null
-          code=$?
-          set -e
-          if [ "$code" -eq 0 ]; then
-            git fetch --depth=1 origin state
-            git show FETCH_HEAD:state.json > public/data/state.json
-          elif [ "$code" -eq 2 ]; then
-            echo "Primeira verificação: histórico novo."
-          else
-            echo "Não deu para ler o histórico; parando para não apagar nada."
-            exit 1
-          fi
-
-      - name: Verificar
-        run: node check.mjs public/data/state.json
-
-      - name: Guardar o histórico
+      - name: Verificar a cada 5 minutos
         env:
           TOKEN: ${{ github.token }}
         run: |
-          dir=$(mktemp -d)
-          cp public/data/state.json "$dir/"
-          cd "$dir"
-          git init -q -b state
-          git add state.json
-          git -c user.name="samba-status" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Histórico"
-          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" state
+          stop=$(( $(date +%s) + 340 * 60 ))
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # `set -e` doesn't apply inside a function called with `||`: every step returns on its own failure, so a
+          # round that can't read the history never pushes an empty one over it.
+          round() {
+            dir=$(mktemp -d)
+            code=0
+            git ls-remote --exit-code --heads origin state > /dev/null || code=$?
+            if [ "$code" -eq 0 ]; then
+              git fetch -q --depth=1 origin state || return 1
+              git show FETCH_HEAD:state.json > "$dir/state.json" || return 1
+              [ -s "$dir/state.json" ] || return 1
+            elif [ "$code" -eq 2 ]; then
+              echo "Primeira verificação: histórico novo."
+            else
+              echo "Não deu para ler o histórico; pulando esta rodada para não apagar nada."
+              return 1
+            fi
+            node check.mjs "$dir/state.json" || return 1
+            git -C "$dir" init -q -b state || return 1
+            git -C "$dir" add state.json || return 1
+            git -C "$dir" -c user.name="samba-status" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Histórico" || return 1
+            git -C "$dir" push -qf "$remote" state || return 1
+          }
+          while :; do
+            started=$(date +%s)
+            echo "::group::$(TZ=America/Sao_Paulo date '+%d/%m %H:%M')"
+            round || echo "Rodada falhou; tenta de novo em 5 minutos."
+            echo "::endgroup::"
+            next=$(( started + 300 ))
+            [ "$next" -ge "$stop" ] && break
+            sleep $(( next - $(date +%s) > 0 ? next - $(date +%s) : 0 ))
+          done
+
+      - name: Começar a próxima rodada
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run status.yml --ref main -R "$GITHUB_REPOSITORY"
 
       # GitHub turns off scheduled workflows after 60 days without activity in the repository.
       - name: Manter o agendamento ligado
@@ -76,10 +109,3 @@ jobs:
             git -c user.name="samba-status" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --allow-empty -qm "Manter a verificação ligada"
             git push -q origin HEAD:main
           fi
-
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: public
-
-      - id: deploy
-        uses: actions/deploy-pages@v4

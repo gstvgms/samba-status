@@ -7,7 +7,9 @@ Fica fora do Railway de propósito: se o Samba cair, esta página continua no ar
 
 ## Como funciona
 
-- `.github/workflows/status.yml` roda a cada 5 minutos (o GitHub às vezes atrasa alguns minutos) e chama `check.mjs`.
+- `.github/workflows/status.yml` chama `check.mjs` a cada 5 minutos. O agendamento do GitHub roda só a cada poucas horas
+  na prática (13/11/2026: 5 a 8 h entre rodadas), então cada execução fica 5 h 40 conferindo de 5 em 5 minutos e no fim
+  começa a próxima sozinha. O agendamento de 30 min fica de reserva se essa corrente quebrar.
 - `check.mjs` confere quatro coisas, de fora, como o app faz:
   - **Site e app:** `/api/health`
   - **Mensagens e calls:** abre a ligação ao vivo e espera o "hello"
@@ -15,7 +17,8 @@ Fica fora do Railway de propósito: se o Samba cair, esta página continua no ar
   - **Download e atualizações:** o `latest.yml`
 - Uma falha é tentada de novo depois de 20 segundos antes de contar como queda.
 - O histórico (90 dias por dia, 24 horas de checagens e as quedas) fica no branch `state`. É um commit só, trocado a
-  cada rodada, para o repositório não crescer. A página publicada lê uma cópia em `data/state.json`.
+  cada rodada, para o repositório não crescer. A página lê esse arquivo direto do branch (raw.githubusercontent.com),
+  então uma checagem não precisa publicar o Pages; o Pages só é publicado num push no `main`.
 - `public/` é a página (HTML, CSS e JS sem build), publicada pelo GitHub Pages via Actions.
 
 ## Escrever sobre uma queda, uma instabilidade ou uma manutenção
